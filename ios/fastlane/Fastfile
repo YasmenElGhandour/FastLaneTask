@@ -17,26 +17,45 @@ default_platform(:ios)
 
 platform :ios do
 
-  lane :increment do
-  increment_build_number
-  end
-
-  desc "Build and upload iOS app to App Store Connect"
   lane :release do
+    # Increment build number
+    increment_build_number
+
+    # Fetch development certificates for the given Apple ID
+    get_certificates(
+      development: true,
+      username: "user@email.com"
+    )
+
     # Clean build directory
     clean_build_artifacts
-    # Ensure provisioning profiles and signing
-    match(
+
+    # Ensure provisioning profiles and signing with match
+    match_result = match(
       type: "appstore",                    # or "adhoc" for adhoc builds
       app_identifier: "com.example.fastlaneflutterexample",
       readonly: false
     )
-    # Build the app
+
+    # Extract certificate and profile paths from match output
+    cert_path = match_result[:certificate_path]
+    profile_path = match_result[:profile_path]
+
+    UI.message("Certificate path: #{cert_path}")
+    UI.message("Provisioning profile path: #{profile_path}")
+
+    # Build the app using explicit signing info
     build_app(
-      workspace: "fastlaneflutterexample.xcworkspace",
-      scheme: "YourAppScheme",
-      export_method: "app-store"
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.example.fastlaneflutterexample" => File.basename(profile_path)
+        }
+      }
     )
+
     # Upload to App Store Connect (TestFlight or App Store)
     upload_to_app_store(
       skip_metadata: true,
@@ -44,9 +63,6 @@ platform :ios do
       submit_for_review: false,           # Set to true if you want auto-submission
       automatic_release: false            # Set to true for automatic release
     )
-
-    # Optional: Notify via Slack
-    # slack(message: "iOS build successfully uploaded to App Store Connect!")
 
     # Optional: Clean after build
     clean_build_artifacts

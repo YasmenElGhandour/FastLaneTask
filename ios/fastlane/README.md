@@ -15,21 +15,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
-### ios increment
-
-```sh
-[bundle exec] fastlane ios increment
-```
-
-
-
 ### ios release
 
 ```sh
 [bundle exec] fastlane ios release
 ```
 
-Build and upload iOS app to App Store Connect
+
 
 ----
 
