@@ -1,0 +1,54 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+
+  lane :increment do
+  increment_build_number
+  end
+
+  desc "Build and upload iOS app to App Store Connect"
+  lane :release do
+    # Clean build directory
+    clean_build_artifacts
+    # Ensure provisioning profiles and signing
+    match(
+      type: "appstore",                    # or "adhoc" for adhoc builds
+      app_identifier: "com.example.fastlaneflutterexample",
+      readonly: false
+    )
+    # Build the app
+    build_app(
+      workspace: "fastlaneflutterexample.xcworkspace",
+      scheme: "YourAppScheme",
+      export_method: "app-store"
+    )
+    # Upload to App Store Connect (TestFlight or App Store)
+    upload_to_app_store(
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false,           # Set to true if you want auto-submission
+      automatic_release: false            # Set to true for automatic release
+    )
+
+    # Optional: Notify via Slack
+    # slack(message: "iOS build successfully uploaded to App Store Connect!")
+
+    # Optional: Clean after build
+    clean_build_artifacts
+  end
+end

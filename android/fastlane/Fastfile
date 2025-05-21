@@ -1,0 +1,74 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Run unit tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Build release APK or AAB"
+  lane :build do
+    # Clean the project and assemble the release build (AAB is recommended)
+    gradle(
+      task: "clean bundleRelease"
+    )
+  end
+
+  desc "Sign the AAB file manually if needed (optional step)"
+  # Only needed if you're not signing in `build.gradle`
+  # lane :sign do
+  #   sh("jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore path/to/keystore.jks path/to/app-release.aab alias_name")
+  # end
+
+  desc "Upload to internal test track"
+  lane :internal do
+    build
+
+    upload_to_play_store(
+      track: "internal",                    # Can be internal, alpha, beta, production
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Upload to production track"
+  lane :deploy do
+    build
+
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      changes_not_sent_for_review: false  # Set to true if you want to skip review (internal only)
+    )
+  end
+
+  desc "Upload to Firebase Crashlytics (Beta Testing)"
+  lane :beta do
+    gradle(task: "clean assembleRelease")
+
+    crashlytics(
+      api_token: ENV["FIREBASE_API_TOKEN"],     # Optional: Set up environment variables
+      groups: "testers"                         # Firebase group name
+    )
+  end
+end
