@@ -21,7 +21,25 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane android test
 ```
 
-Runs all the tests
+Run unit tests
+
+### android build
+
+```sh
+[bundle exec] fastlane android build
+```
+
+Build release APK or AAB
+
+### android internal
+
+```sh
+[bundle exec] fastlane android internal
+```
+
+Sign the AAB file manually if needed (optional step)
+
+Upload to internal test track
 
 ### android deploy
 
@@ -29,7 +47,15 @@ Runs all the tests
 [bundle exec] fastlane android deploy
 ```
 
-Deploy a new version to the Google Play
+Upload to production track
+
+### android beta
+
+```sh
+[bundle exec] fastlane android beta
+```
+
+Upload to Firebase Crashlytics (Beta Testing)
 
 ----
 
